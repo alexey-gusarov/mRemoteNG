@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using mRemoteNG.App;
 using mRemoteNG.Connection.Protocol;
@@ -11,6 +15,7 @@ using mRemoteNG.UI.Forms;
 using mRemoteNG.UI.Panels;
 using mRemoteNG.UI.Tabs;
 using mRemoteNG.UI.Window;
+using Newtonsoft.Json.Linq;
 using WeifenLuo.WinFormsUI.Docking;
 
 
@@ -62,6 +67,11 @@ namespace mRemoteNG.Connection
 
             try
             {
+                if (IsVaultEnabled(connectionInfo))
+                {
+                    connectionInfo = SpecifyCredentialsFromVault(connectionInfo);
+                }
+
                 if (connectionInfo.Hostname == "" && connectionInfo.Protocol != ProtocolType.IntApp)
                 {
                     Runtime.MessageCollector.AddMessage(MessageClass.WarningMsg,
@@ -232,6 +242,59 @@ namespace mRemoteNG.Connection
             {
                 Runtime.MessageCollector.AddExceptionStackTrace(Language.ConnectionOpenFailed, ex);
             }
+        }
+
+        private static Regex _vaultUrlReplacer = new Regex("/ui/vault/secrets/kv/show/");
+
+        private static ConnectionInfo SpecifyCredentialsFromVault(ConnectionInfo connectionInfo)
+        {
+            connectionInfo = connectionInfo.Clone();
+            Runtime.MessageCollector.AddMessage(MessageClass.InformationMsg,
+                $"Trying to use vault: {connectionInfo.VaultUri}, field for Username: '{connectionInfo.Username}', field for Password: '{connectionInfo.Password}'");
+
+            var vaultToken = GetVaultToken();
+            if (vaultToken == null)
+                return connectionInfo;
+
+            var webClient = new WebClient();
+            webClient.Headers.Add("X-Vault-Token", vaultToken);
+            webClient.Headers.Add("Content-Type","application/json");
+            var vaultUri = _vaultUrlReplacer.Replace(connectionInfo.VaultUri, "/v1/kv/data/");
+            var secret = webClient.DownloadString(vaultUri);
+            var json = JObject.Parse(secret);
+            var data = json["data"]["data"];
+            connectionInfo.Username = data[connectionInfo.Username].ToString();
+            connectionInfo.Password = data[connectionInfo.Password].ToString();
+
+            return connectionInfo;
+        }
+
+        private static string GetVaultToken()
+        {
+            var homeTokenFile = Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".vault-token");
+            if (File.Exists(homeTokenFile))
+            {
+                return File.ReadAllText(homeTokenFile);
+            }
+
+            var tokenFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".vault-token");
+            if (File.Exists(tokenFile))
+            {
+                return File.ReadAllText(tokenFile);
+            }
+
+            Runtime.MessageCollector.AddMessage(MessageClass.ErrorMsg,
+                $"Vault token not found. Please login (ldap with {Environment.UserName}) to {ConfigurationManager.AppSettings["VaultUrl"]} and put token into " +
+                $"file '{tokenFile}' or login by command \"vault login --method=ldap username={Environment.UserName}\". See details in {ConfigurationManager.AppSettings["VaultHelpPage"]}.");
+
+            return null;
+        }
+
+        private static bool IsVaultEnabled(ConnectionInfo connectionInfo)
+        {
+            return !string.IsNullOrWhiteSpace(connectionInfo.VaultUri) &&
+                   !string.IsNullOrWhiteSpace(connectionInfo.Username) &&
+                   !string.IsNullOrWhiteSpace(connectionInfo.Password);
         }
 
         // recursively traverse the tree to find ConnectionInfo of a specific name

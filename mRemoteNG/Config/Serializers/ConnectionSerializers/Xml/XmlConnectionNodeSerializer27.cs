@@ -168,6 +168,8 @@ namespace mRemoteNG.Config.Serializers.ConnectionSerializers.Xml
             element.Add(_saveFilter.SaveDomain
                             ? new XAttribute("RDGatewayDomain", connectionInfo.RDGatewayDomain)
                             : new XAttribute("RDGatewayDomain", ""));
+
+            element.Add(new XAttribute("VaultUri", connectionInfo.VaultUri));
         }
 
         private void SetInheritanceAttributes(XContainer element, IInheritable connectionInfo)

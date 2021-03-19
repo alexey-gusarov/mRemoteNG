@@ -959,7 +959,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Language\Language.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <CustomToolNamespace>mRemoteNG</CustomToolNamespace>
+      <CustomToolNamespace>mRemoteNG.Resources.Language</CustomToolNamespace>
       <SubType>Designer</SubType>
       <LastGenOutput>Language.Designer.cs</LastGenOutput>
     </EmbeddedResource>
@@ -1548,6 +1548,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Users\gusarov_a\.nuget\packages\newtonsoft.json\12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
@@ -1597,6 +1601,9 @@
     </PackageReference>
     <PackageReference Include="MySql.Data">
       <Version>8.0.21</Version>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.1-beta2</Version>
     </PackageReference>
     <PackageReference Include="NUnit3TestAdapter">
       <Version>3.17.0</Version>

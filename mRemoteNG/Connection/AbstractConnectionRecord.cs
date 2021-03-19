@@ -23,6 +23,7 @@ namespace mRemoteNG.Connection
 
         private string _hostname;
         private string _username = "";
+        private string _vaultUri = "";
         private string _password = "";
         private string _domain = "";
         private string _vmId = "";
@@ -157,6 +158,17 @@ namespace mRemoteNG.Connection
         {
             get => GetPropertyValue("Port", _port);
             set => SetField(ref _port, value, "Port");
+        }
+
+        [LocalizedAttributes.LocalizedCategory(nameof(Language.Connection), 2),
+         LocalizedAttributes.LocalizedDisplayName(nameof(Language.VaultUri)),
+         LocalizedAttributes.LocalizedDescription(nameof(Language.PropertyDescriptionVaultUri)),
+         AttributeUsedInAllProtocolsExcept(ProtocolType.VNC, ProtocolType.Telnet, ProtocolType.Rlogin, ProtocolType.RAW)]
+        [Browsable(true)]
+        public virtual string VaultUri
+        {
+            get => GetPropertyValue("VaultUri", _vaultUri);
+            set => SetField(ref _vaultUri, Settings.Default.DoNotTrimUsername ? value : value?.Trim(), "VaultUri");
         }
 
         [LocalizedAttributes.LocalizedCategory(nameof(Language.Connection), 2),

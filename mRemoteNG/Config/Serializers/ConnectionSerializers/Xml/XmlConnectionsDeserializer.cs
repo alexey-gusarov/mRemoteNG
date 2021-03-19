@@ -556,6 +556,8 @@ namespace mRemoteNG.Config.Serializers.ConnectionSerializers.Xml
                     connectionInfo.Inheritance.DisableMenuAnimations = xmlnode.GetAttributeAsBool("InheritDisableMenuAnimations");
                     connectionInfo.Inheritance.DisableCursorShadow = xmlnode.GetAttributeAsBool("InheritDisableCursorShadow");
                     connectionInfo.Inheritance.DisableCursorBlinking = xmlnode.GetAttributeAsBool("InheritDisableCursorBlinking");
+
+                    connectionInfo.VaultUri  = xmlnode.GetAttributeAsString("VaultUri");
                 }
             }
             catch (Exception ex)

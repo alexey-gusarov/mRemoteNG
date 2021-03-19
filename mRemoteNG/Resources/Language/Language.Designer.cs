@@ -9,6 +9,9 @@
 //------------------------------------------------------------------------------
 
 namespace mRemoteNG.Resources.Language {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -4273,6 +4276,15 @@ namespace mRemoteNG.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enter link to Vault secret..
+        /// </summary>
+        internal static string PropertyDescriptionVaultUri {
+            get {
+                return ResourceManager.GetString("PropertyDescriptionVaultUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to If you want to establish a view only connection to the host select yes..
         /// </summary>
         internal static string PropertyDescriptionViewOnly {
@@ -6298,6 +6310,15 @@ namespace mRemoteNG.Resources.Language {
         internal static string UseVmId {
             get {
                 return ResourceManager.GetString("UseVmId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vault URI.
+        /// </summary>
+        internal static string VaultUri {
+            get {
+                return ResourceManager.GetString("VaultUri", resourceCulture);
             }
         }
         
