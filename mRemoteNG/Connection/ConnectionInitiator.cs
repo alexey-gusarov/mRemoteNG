@@ -244,22 +244,40 @@ namespace mRemoteNG.Connection
             }
         }
 
-        private static Regex _vaultUrlReplacer = new Regex("/ui/vault/secrets/kv/show/");
+        private static Regex _vaultUrlReplacer = new Regex(ConfigurationManager.AppSettings["VaultUriReplaceRegex"]);
 
         private static ConnectionInfo SpecifyCredentialsFromVault(ConnectionInfo connectionInfo)
         {
             connectionInfo = connectionInfo.Clone();
             Runtime.MessageCollector.AddMessage(MessageClass.InformationMsg,
                 $"Trying to use vault: {connectionInfo.VaultUri}, field for Username: '{connectionInfo.Username}', field for Password: '{connectionInfo.Password}'");
+            string vaultToken;
+            if(string.Equals( ConfigurationManager.AppSettings["VaultAuthType"], "kerberos", StringComparison.OrdinalIgnoreCase))
+            {
+                using var client = new WebClient();
+                client.UseDefaultCredentials = true;
+                var jsonKerbStr = client.UploadString(new Uri(new Uri(ConfigurationManager.AppSettings["VaultUrl"]),
+                    "v1/auth/kerberos/login"), "POST", "");
+                var jsonKerb = JObject.Parse(jsonKerbStr);
+                vaultToken = jsonKerb["auth"]["client_token"].ToString();
 
-            var vaultToken = GetVaultToken();
+                Runtime.MessageCollector.AddMessage(MessageClass.InformationMsg,
+                    $"Kerberos token received");
+
+            }
+            else
+            {
+                vaultToken = GetVaultToken();
+            }
+
+
             if (vaultToken == null)
                 return connectionInfo;
 
             var webClient = new WebClient();
             webClient.Headers.Add("X-Vault-Token", vaultToken);
             webClient.Headers.Add("Content-Type","application/json");
-            var vaultUri = _vaultUrlReplacer.Replace(connectionInfo.VaultUri, "/v1/kv/data/");
+            var vaultUri = _vaultUrlReplacer.Replace(connectionInfo.VaultUri, ConfigurationManager.AppSettings["VaultUriReplaceValue"]);
             var secret = webClient.DownloadString(vaultUri);
             var json = JObject.Parse(secret);
             var data = json["data"]["data"];
